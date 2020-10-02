@@ -1,0 +1,33 @@
+cmake_minimum_required(VERSION 3.16)
+project(logic_simulator)
+set(CMAKE_CXX_STANDARD 17)
+#When calling the cmake command, or in your IDE cmake options:
+#Set -DCLIENT_BUILD_CMAKE_TOOLCHAIN="<EmscriptenRoot>/cmake/Modules/Platform/Emscripten.cmake" where "EmscriptenRoot" is your Emscripten SDK
+set(CLIENT_BUILD_CMAKE_TOOLCHAIN $ENV{CLIENT_BUILD_CMAKE_TOOLCHAIN})
+
+if(WIN32)
+    set(CLIENT_BUILD_MAKEFILES "MinGW Makefiles")
+else()
+    set(CLIENT_BUILD_MAKEFILES "Unix Makefiles")
+endif()
+#Client directory setup.
+set(CLIENT_SOURCE_DIR "${CMAKE_CURRENT_LIST_DIR}/Client")
+string(TOLOWER "${CMAKE_BUILD_TYPE}" CLIENT_BUILD_DIR)
+set(CLIENT_BUILD_DIR "${CLIENT_SOURCE_DIR}/cmake-build-${CLIENT_BUILD_DIR}")
+file(MAKE_DIRECTORY "${CLIENT_BUILD_DIR}")
+#Generate client make files.
+execute_process(COMMAND ${CMAKE_COMMAND} "-DCMAKE_TOOLCHAIN_FILE=${CLIENT_BUILD_CMAKE_TOOLCHAIN}"
+                                         "-DCMAKE_BUILD_TYPE=${CMAKE_BUILD_TYPE}"
+                                         "-G" "${CLIENT_BUILD_MAKEFILES}"
+                                         "../"
+                WORKING_DIRECTORY "${CLIENT_BUILD_DIR}")
+#Build the client.
+add_custom_target(build-client ALL COMMAND ${CMAKE_COMMAND} "--build" "${CLIENT_BUILD_DIR}" "--target" "all")
+#Copy the built client to a folder in the server build directory.
+set(CLIENT_FILES "${CLIENT_SOURCE_DIR}/index.html" "${CLIENT_SOURCE_DIR}/clinit.jsx"
+                "${CLIENT_BUILD_DIR}/client.wasm.js" "${CLIENT_BUILD_DIR}/client.wasm.wasm")
+file(MAKE_DIRECTORY "${CMAKE_CURRENT_BINARY_DIR}/Client")
+add_custom_target(copy-client ALL COMMAND ${CMAKE_COMMAND} "-E" "copy_if_different" ${CLIENT_FILES} "${CMAKE_CURRENT_BINARY_DIR}/Client")
+add_dependencies(copy-client build-client)
+#Build the server.
+add_executable(server Server/main.cpp)
