@@ -1,8 +1,10 @@
 cmake_minimum_required(VERSION 3.16)
 project(logic_simulator)
 set(CMAKE_CXX_STANDARD 17)
+set(CMAKE_CXX_FLAGS_RELEASE -O3)
 #When calling the cmake command, or in your IDE cmake options:
 #Set -DCLIENT_BUILD_CMAKE_TOOLCHAIN="<EmscriptenRoot>/cmake/Modules/Platform/Emscripten.cmake" where "EmscriptenRoot" is your Emscripten SDK
+#location.
 set(CLIENT_BUILD_CMAKE_TOOLCHAIN $ENV{CLIENT_BUILD_CMAKE_TOOLCHAIN})
 
 if(WIN32)
@@ -26,8 +28,22 @@ add_custom_target(build-client ALL COMMAND ${CMAKE_COMMAND} "--build" "${CLIENT_
 #Copy the built client to a folder in the server build directory.
 set(CLIENT_FILES "${CLIENT_SOURCE_DIR}/index.html" "${CLIENT_SOURCE_DIR}/clinit.jsx"
                 "${CLIENT_BUILD_DIR}/client.wasm.js" "${CLIENT_BUILD_DIR}/client.wasm.wasm")
-file(MAKE_DIRECTORY "${CMAKE_CURRENT_BINARY_DIR}/Client")
-add_custom_target(copy-client ALL COMMAND ${CMAKE_COMMAND} "-E" "copy_if_different" ${CLIENT_FILES} "${CMAKE_CURRENT_BINARY_DIR}/Client")
+set(CLIENT_OUT_DIR "${CMAKE_CURRENT_BINARY_DIR}/Client")
+file(MAKE_DIRECTORY "${CLIENT_OUT_DIR}")
+add_custom_target(copy-client ALL COMMAND ${CMAKE_COMMAND} "-E" "copy_if_different" ${CLIENT_FILES} "${CLIENT_OUT_DIR}")
 add_dependencies(copy-client build-client)
+
+if(${CMAKE_BUILD_TYPE} MATCHES "Debug")
+
+    set(DEBUG_OUT_DIR "${CLIENT_OUT_DIR}/wasm_cpp_src")
+    file(MAKE_DIRECTORY "${DEBUG_OUT_DIR}")
+    add_custom_target(copy-debug-map ALL COMMAND ${CMAKE_COMMAND} "-E" "copy" "${CLIENT_BUILD_DIR}/client.wasm.wasm.map"
+            "${DEBUG_OUT_DIR}")
+    add_dependencies(copy-debug-map build-client)
+    add_custom_target(copy-debug-src ALL COMMAND ${CMAKE_COMMAND} "-E" "copy_directory" "${CLIENT_SOURCE_DIR}/wasm_cpp_src"
+            "${DEBUG_OUT_DIR}")
+    add_dependencies(copy-debug-src build-client)
+
+endif()
 #Build the server.
 add_executable(server Server/main.cpp)
