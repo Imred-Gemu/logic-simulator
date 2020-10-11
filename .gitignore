@@ -1,4 +1,6 @@
 /Client/cmake-build-debug/
 /cmake-build-debug/
 /build/
+/deps-src/
+/deps/
 /.idea/

@@ -1,0 +1,17 @@
+find_package(OpenSSL)
+
+if(NOT OPENSSL_FOUND)
+    if(WIN32)
+        message("Downloading OpenSSL")
+        file(DOWNLOAD "https://slproweb.com/download/Win64OpenSSL-1_1_1h.exe" "./OpenSSL-installer.exe")
+        message("Executing OpenSSL Installer")
+        execute_process(COMMAND "OpenSSL-installer.exe")
+        find_package(OpenSSL)
+
+        if(NOT OPENSSL_FOUND)
+            message(FATAL_ERROR "OpenSSL failed to download or install, manual installation required")
+        endif()
+    else()
+        message(FATAL_ERROR "OpenSSL Not found, please install in using your favorite package manager")
+    endif()
+endif()
