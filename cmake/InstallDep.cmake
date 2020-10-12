@@ -1,17 +1,21 @@
 include(FetchContent)  
 
-macro(install_dep dep repo tag build subdirectory)
+macro(install_dep dep repo tag build subdirectory install_in_root)
     FetchContent_Declare(${dep} 
         GIT_REPOSITORY "${repo}"         
         GIT_TAG "${tag}"
-        SOURCE_DIR ${CMAKE_CURRENT_SOURCE_DIR}/deps-src/${dep}
+        SOURCE_DIR ${CMAKE_CURRENT_SOURCE_DIR}/deps/src/${dep}
     ) 
 
     if(NOT ${dep}_POPULATED)
         FetchContent_Populate(${dep})
 
         if(${build})
-            set(install_path ${CMAKE_CURRENT_BINARY_DIR}/deps/${dep})
+            if(${install_in_root})
+                set(install_path ${CMAKE_CURRENT_SOURCE_DIR}/deps/${dep})
+            else()
+                set(install_path ${CMAKE_CURRENT_BINARY_DIR}/deps/${dep})
+            endif()
 
             execute_process(
                 COMMAND ${CMAKE_COMMAND}
@@ -41,9 +45,9 @@ macro(install_dep dep repo tag build subdirectory)
 endmacro()
 
 macro(install_dep_subdir dep repo tag)
-    install_dep(${dep} ${repo} ${tag} False True)
+    install_dep(${dep} ${repo} ${tag} False True False)
 endmacro()
 
-macro(install_dep_install dep repo tag)
-    install_dep(${dep} ${repo} ${tag} True False)
+macro(install_dep_install dep repo tag install_in_root)
+    install_dep(${dep} ${repo} ${tag} True False ${install_in_root})
 endmacro()

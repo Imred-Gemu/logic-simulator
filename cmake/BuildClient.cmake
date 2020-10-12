@@ -11,7 +11,7 @@ endif()
 #Client directory setup.
 set(CLIENT_SOURCE_DIR "${CMAKE_CURRENT_LIST_DIR}/../Client")
 string(TOLOWER "${CMAKE_BUILD_TYPE}" CLIENT_BUILD_DIR)
-set(CLIENT_BUILD_DIR "${CMAKE_CURRENT_BINARY_DIR}/cmake-build-${CLIENT_BUILD_DIR}")
+set(CLIENT_BUILD_DIR "${CMAKE_CURRENT_BINARY_DIR}/client-build-${CLIENT_BUILD_DIR}")
 file(MAKE_DIRECTORY "${CLIENT_BUILD_DIR}")
 #Generate client make files.
 message("Configuring client project " ${CLIENT_BUILD_DIR})

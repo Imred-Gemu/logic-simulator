@@ -1,5 +1,5 @@
 
-list(APPEND CMAKE_PREFIX_PATH ${CMAKE_CURRENT_BINARY_DIR}/deps/boost/)
+list(APPEND CMAKE_PREFIX_PATH ${CMAKE_CURRENT_SOURCE_DIR}/deps/boost/)
 
 find_package(Boost ${BOOST_REQUESTED_VERSION} CONFIG COMPONENTS ${BOOST_COMPONENTS})
 
@@ -14,13 +14,13 @@ if(NOT Boost_FOUND)
     message("Downloading Boost at ${BOOST_URL}")
     FetchContent_Declare(boost
         URL ${BOOST_URL}
-        SOURCE_DIR ${CMAKE_CURRENT_SOURCE_DIR}/deps-src/boost
-        BINARY_DIR ${CMAKE_CURRENT_BINARY_DIR}/deps/boost
+        SOURCE_DIR ${CMAKE_CURRENT_SOURCE_DIR}/deps/src/boost
+        BINARY_DIR ${CMAKE_CURRENT_SOURCE_DIR}/deps/boost
      ) 
 
     if(NOT Boost_POPULATED)
         FetchContent_Populate(boost)
-           set(install_path ${CMAKE_CURRENT_BINARY_DIR}/deps/boost)
+           set(install_path ${CMAKE_CURRENT_SOURCE_DIR}/deps/boost)
 
             if(WIN32)
                 set(BOOT_BOOTSTRAP "bootstrap.bat")
