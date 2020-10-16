@@ -13,3 +13,10 @@ install_dep_subdir(simple-websocket-server "https://gitlab.com/eidheim/Simple-We
 add_executable(server Server/main.cpp)
 
 target_link_libraries(server simple-web-server simple-websocket-server ${Boost_LIBRARIES})
+
+set_target_properties(server
+    PROPERTIES
+    ARCHIVE_OUTPUT_DIRECTORY "${CMAKE_CURRENT_BINARY_DIR}/bin/"
+    LIBRARY_OUTPUT_DIRECTORY "${CMAKE_CURRENT_BINARY_DIR}/bin/"
+    RUNTIME_OUTPUT_DIRECTORY "${CMAKE_CURRENT_BINARY_DIR}/bin/"
+)
