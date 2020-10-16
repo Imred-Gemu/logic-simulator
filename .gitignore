@@ -4,3 +4,5 @@
 /deps-src/
 /deps/
 /.idea/
+
+cmake/mingw-test/

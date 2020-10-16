@@ -1,10 +1,11 @@
 #When calling the cmake command, or in your IDE cmake options:
 #Set -DCLIENT_BUILD_CMAKE_TOOLCHAIN="<EmscriptenRoot>/cmake/Modules/Platform/Emscripten.cmake" where "EmscriptenRoot" is your Emscripten SDK
 #location.
-set(CLIENT_BUILD_CMAKE_TOOLCHAIN $ENV{CLIENT_BUILD_CMAKE_TOOLCHAIN})
+include("cmake/GetEmscripten.cmake")
 
 if(WIN32)
     set(CLIENT_BUILD_MAKEFILES "MinGW Makefiles")
+    include("cmake/GetMingw.cmake")
 else()
     set(CLIENT_BUILD_MAKEFILES "Unix Makefiles")
 endif()
@@ -15,7 +16,7 @@ set(CLIENT_BUILD_DIR "${CMAKE_CURRENT_BINARY_DIR}/client-build-${CLIENT_BUILD_DI
 file(MAKE_DIRECTORY "${CLIENT_BUILD_DIR}")
 #Generate client make files.
 message("Configuring client project " ${CLIENT_BUILD_DIR})
-execute_process(COMMAND ${CMAKE_COMMAND} "-DCMAKE_TOOLCHAIN_FILE=${CLIENT_BUILD_CMAKE_TOOLCHAIN}"
+execute_process(COMMAND ${CMAKE_COMMAND} "-DCMAKE_TOOLCHAIN_FILE=${EMSCRIPTEN_TOOLCHAIN}"
                                          "-DCMAKE_BUILD_TYPE=${CMAKE_BUILD_TYPE}"
                                          "-G" "${CLIENT_BUILD_MAKEFILES}"
                                          "-DCMAKE_SH=SH-NOTFOUND"
