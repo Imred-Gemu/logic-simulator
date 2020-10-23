@@ -25,27 +25,33 @@ execute_process(COMMAND ${CMAKE_COMMAND} "-DCMAKE_TOOLCHAIN_FILE=${EMSCRIPTEN_TO
 #Build the client.
 add_custom_target(build-client ALL COMMAND ${CMAKE_COMMAND} "--build" "${CLIENT_BUILD_DIR}" "--target" "all")
 #Copy the built client to a folder in the server build directory.
-set(CLIENT_FILES "${CLIENT_SOURCE_DIR}/index.html" "${CLIENT_SOURCE_DIR}/clinit.jsx"
-                "${CLIENT_BUILD_DIR}/client.wasm.js" "${CLIENT_BUILD_DIR}/client.wasm.wasm")
-#set(CLIENT_OUT_DIR "${CMAKE_CURRENT_BINARY_DIR}/Client")
+
+list(APPEND CLIENT_WASM_FILES "${CLIENT_BUILD_DIR}/client.wasm.js")
+list(APPEND CLIENT_WASM_FILES "${CLIENT_BUILD_DIR}/client.wasm.wasm")
+
+set(CLIENT_CONTENT_DIR  "${CLIENT_SOURCE_DIR}/content/")
+
 set(CLIENT_OUT_DIR "$<TARGET_FILE_DIR:server>/Client")
-#file(MAKE_DIRECTORY "${CLIENT_OUT_DIR}")
+set(CLIENT_WASM_OUT_DIR "${CLIENT_OUT_DIR}/wasm")
+set(CLIENT_CONTENT_OUT_DIR "${CLIENT_OUT_DIR}")
+
 add_custom_target(copy-client ALL 
-	COMMAND ${CMAKE_COMMAND} "-E" "make_directory" "${CLIENT_OUT_DIR}"
-	COMMAND ${CMAKE_COMMAND} "-E" "copy_if_different" ${CLIENT_FILES} "${CLIENT_OUT_DIR}")
+    COMMAND ${CMAKE_COMMAND} "-E" "copy_directory" "${CLIENT_CONTENT_DIR}" "${CLIENT_CONTENT_OUT_DIR}"
+    COMMAND ${CMAKE_COMMAND} "-E" "make_directory" "${CLIENT_WASM_OUT_DIR}"
+    COMMAND ${CMAKE_COMMAND} "-E" "copy_if_different" ${CLIENT_WASM_FILES} "${CLIENT_WASM_OUT_DIR}")
 add_dependencies(copy-client build-client)
 
 if(${CMAKE_BUILD_TYPE} MATCHES "Debug")
 
-    set(DEBUG_OUT_DIR "${CLIENT_OUT_DIR}/wasm_cpp_src")
-    #file(MAKE_DIRECTORY "${DEBUG_OUT_DIR}")
+    set(DEBUG_OUT_DIR "${CLIENT_OUT_DIR}/debug")
+
     add_custom_target(copy-debug-map ALL 
 		COMMAND ${CMAKE_COMMAND} "-E" "make_directory" "${DEBUG_OUT_DIR}"
 		COMMAND ${CMAKE_COMMAND} "-E" "copy" "${CLIENT_BUILD_DIR}/client.wasm.wasm.map" "${DEBUG_OUT_DIR}")
     add_dependencies(copy-debug-map copy-client)
     add_custom_target(copy-debug-src ALL 
 		COMMAND ${CMAKE_COMMAND} "-E" "make_directory" "${DEBUG_OUT_DIR}"
-    	COMMAND ${CMAKE_COMMAND} "-E" "copy_directory" "${CLIENT_SOURCE_DIR}/wasm_cpp_src" "${DEBUG_OUT_DIR}")
+    	COMMAND ${CMAKE_COMMAND} "-E" "copy_directory" "${CLIENT_SOURCE_DIR}/src/cpp" "${DEBUG_OUT_DIR}/src/cpp")
     add_dependencies(copy-debug-src copy-client)
 
 endif()

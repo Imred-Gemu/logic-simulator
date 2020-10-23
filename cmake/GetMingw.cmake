@@ -1,7 +1,5 @@
 function(TEST_MINGW)
     set(MINGW_TEST_PATH ${CMAKE_CURRENT_SOURCE_DIR}/cmake/mingw-test)
-    file(REMOVE_RECURSE ${MINGW_TEST_PATH})
-    file(MAKE_DIRECTORY ${MINGW_TEST_PATH})
 
     set(MINGW_TEST_CMAKEFILES "cmake_minimum_required(VERSION 3.15)\nproject(mingw_test)")
 
@@ -15,6 +13,8 @@ function(TEST_MINGW)
                                      "${MINGW_TEST_PATH}"
                     WORKING_DIRECTORY "${MINGW_TEST_PATH}"
                     RESULT_VARIABLE MINGW_TEST_RESULT)
+    
+    file(REMOVE_RECURSE ${MINGW_TEST_PATH})
 
     set(MINGW_TEST_RESULT ${MINGW_TEST_RESULT} PARENT_SCOPE)
 endfunction()
