@@ -1,6 +1,11 @@
 #include "client_http.hpp"
 #include "server_http.hpp"
 #include <future>
+#include <chrono>
+
+#include <efsw/efsw.hpp>
+#include <efsw/System.hpp>
+#include <efsw/FileSystem.hpp>
 
 // Added for the default_resource example
 #include <algorithm>
@@ -15,17 +20,51 @@ using namespace std;
 
 using HttpServer = SimpleWeb::Server<SimpleWeb::HTTP>;
 
+size_t lastModified = 0;
+void updateLastModified()
+{
+  using namespace std::chrono;
+  lastModified = duration_cast<milliseconds>(system_clock::now().time_since_epoch()).count();
+}
+
+class UpdateListener : public efsw::FileWatchListener
+{
+public:
+  UpdateListener() {}
+
+  void handleFileAction( efsw::WatchID watchid, const std::string& dir, const std::string& filename, efsw::Action action, std::string oldFilename = "" )
+  {
+    system(CLIENT_BUILD_COMMAND);
+    updateLastModified();
+  }
+};
+
 int main() {
+  updateLastModified();
+  std::cout << CLIENT_BUILD_COMMAND << std::endl;
+
+  efsw::FileWatcher* fileWatcher = new efsw::FileWatcher();
+  UpdateListener* listener = new UpdateListener();
+  efsw::WatchID watchID = fileWatcher->addWatch(CLIENT_SRC_PATH, listener, true );
+  fileWatcher->watch();
+
   // HTTP-server at port 8080 using 1 thread
   // Unless you do more heavy non-threaded processing in the resources,
   // 1 thread is usually faster than several threads
   HttpServer server;
   server.config.port = 8082;
 
-  // Default GET-example. If no other matches, this anonymous function will be called.
-  // Will respond with content in the web/-directory, and its subdirectories.
-  // Default file: index.html
-  // Can for instance be used to retrieve an HTML 5 client that uses REST-resources on this server
+  server.resource["^/last-modified$"]["GET"] = [](shared_ptr<HttpServer::Response> response, shared_ptr<HttpServer::Request> request) {
+    const auto str = std::to_string(lastModified);
+
+    *response << "HTTP/1.1 200 OK\r\n"
+                << "Content-Type: " << "text/plain" << "\r\n"
+                << "Content-Length: " << str.length() << "\r\n"
+                << "\r\n"
+                << str;
+
+  };
+
   server.default_resource["GET"] = [](shared_ptr<HttpServer::Response> response, shared_ptr<HttpServer::Request> request) {
     try {
       auto web_root_path = boost::filesystem::canonical("Client");
