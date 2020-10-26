@@ -40,6 +40,8 @@ add_custom_target(copy-client ALL
     COMMAND ${CMAKE_COMMAND} "-E" "copy_if_different" ${CLIENT_WASM_FILES} "${CLIENT_WASM_OUT_DIR}")
 add_dependencies(copy-client build-client)
 
+add_custom_target(client-all DEPENDS build-client copy-client)
+
 if(${CMAKE_BUILD_TYPE} MATCHES "Debug")
 
     set(DEBUG_OUT_DIR "${CLIENT_OUT_DIR}/debug")
@@ -53,4 +55,6 @@ if(${CMAKE_BUILD_TYPE} MATCHES "Debug")
     	COMMAND ${CMAKE_COMMAND} "-E" "copy_directory" "${CLIENT_SOURCE_DIR}/src/cpp" "${DEBUG_OUT_DIR}/src/cpp")
     add_dependencies(copy-debug-src copy-client)
 
+    add_dependencies(client-all copy-debug-src)
+    add_dependencies(client-all copy-debug-map)
 endif()

@@ -15,7 +15,7 @@ add_executable(server Server/main.cpp)
 
 target_link_libraries(server efsw simple-web-server simple-websocket-server ${Boost_LIBRARIES})
 
-set(CLIENT_BUILD_COMMAND "\\\"${CMAKE_COMMAND}\\\" --build ${CMAKE_CURRENT_BINARY_DIR} --target copy-client")
+set(CLIENT_BUILD_COMMAND "\\\"${CMAKE_COMMAND}\\\" --build ${CMAKE_CURRENT_BINARY_DIR} --target client-all")
 
 if(WIN32)
 	#STRING(REPLACE "/" "\\\\" CLIENT_BUILD_COMMAND "${CLIENT_BUILD_COMMAND}")

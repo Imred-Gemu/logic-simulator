@@ -41,7 +41,6 @@ public:
 
 int main() {
   updateLastModified();
-  std::cout << CLIENT_BUILD_COMMAND << std::endl;
 
   efsw::FileWatcher* fileWatcher = new efsw::FileWatcher();
   UpdateListener* listener = new UpdateListener();
@@ -107,6 +106,13 @@ int main() {
       if(*ifs) {
         auto length = ifs->tellg();
         ifs->seekg(0, ios::beg);
+
+        const std::string extension = path.extension().string();
+
+        if(extension == ".wasm")
+        {
+          header.emplace("Content-Type", "application/wasm");
+        }
 
         header.emplace("Content-Length", to_string(length));
         response->write(header);
