@@ -1,8 +1,8 @@
 cmake_minimum_required(VERSION 3.15)
 
 project(logic_simulator_client)
-set(CMAKE_CXX_STANDARD 17)
-add_compile_options(-std=c++17)
+set(CMAKE_CXX_STANDARD 20)
+add_compile_options(-std=c++20)
 set(CMAKE_CXX_FLAGS_RELEASE -O3)
 #Generates the debug symbols for in browser source debugging.
 set(CMAKE_CXX_FLAGS_DEBUG "-g4 --source-map-base /debug/")

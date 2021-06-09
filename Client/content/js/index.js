@@ -22,3 +22,6 @@ function getLastModified()
 }
 
 setInterval(getLastModified, 1000); 
+
+_simulate()
+console.log(_test(0).toString(2))
